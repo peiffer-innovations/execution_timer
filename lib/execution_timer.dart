@@ -46,7 +46,7 @@ class TimeKeeper {
   static Map<String, ExecutionWatch> group(String name) =>
       Map.unmodifiable(_groups[name] ?? const <String, ExecutionWatch>{});
 
-  /// Measures a named callback.  This will start the timer immediately before
+  /// Measures a named [callback].  This will start the timer immediately before
   /// executing the [callback], end the timer as soon as the [callback] ends
   /// and then either throw the exception thrown by [callback] or return the
   /// result from [callback].
@@ -64,6 +64,30 @@ class TimeKeeper {
     final timer = watch.start();
     try {
       result = await callback(timer);
+    } finally {
+      timer.stop();
+    }
+
+    return result;
+  }
+
+  /// Measures a named [callback].  This functions identically to [measure]
+  /// except that it requires the [callback] to be fully synchronous and does
+  /// not support futures.
+  static T measureSync<T>(
+    String name,
+    T Function(ExecutionTimer timer) callback, {
+    String group = _kDefaultGroup,
+  }) {
+    T result;
+    final watch = ExecutionWatch(
+      group: group,
+      name: name,
+    );
+
+    final timer = watch.start();
+    try {
+      result = callback(timer);
     } finally {
       timer.stop();
     }
