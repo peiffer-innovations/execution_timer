@@ -1,7 +1,7 @@
-## [1.1.0] - Movember 2nd, 2023
+## [1.1.0+1] - Movember 2nd, 2023
 
 * Added precision to `ExecutionWatch` to be able to specific the precision is `millisecond` or `microsecond`.
-
+* Moved `flutter_lints` to `dev_dependencies` and out of `dependencies`
 
 ## [1.0.3+8] - October 31, 2023
 
