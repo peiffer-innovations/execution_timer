@@ -137,6 +137,30 @@ void main() {
     expect(TimeKeeper.groupNames.isEmpty, true);
   });
 
+  test('precision', () async {
+    TimeKeeper.enabled = true;
+
+    final microsecond = ExecutionWatch(
+      group: 'test',
+      name: 'microsecond',
+      precision: TimerPrecision.microsecond,
+    );
+    final millisecond = ExecutionWatch(
+      group: 'test',
+      name: 'millisecond',
+      precision: TimerPrecision.millisecond,
+    );
+    final millisecondWatch = millisecond.start();
+    final microsecondWatch = microsecond.start();
+    await Future.delayed(const Duration(milliseconds: 2));
+    millisecondWatch.stop();
+    microsecondWatch.stop();
+
+    expect(millisecondWatch.runTime, greaterThanOrEqualTo(1));
+    expect(millisecondWatch.runTime, lessThan(10));
+    expect(microsecondWatch.runTime, greaterThanOrEqualTo(1000));
+  });
+
   test('timing', () async {
     TimeKeeper.enabled = true;
 

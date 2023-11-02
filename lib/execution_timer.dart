@@ -123,6 +123,7 @@ class ExecutionWatch {
   factory ExecutionWatch({
     String group = _kDefaultGroup,
     required String name,
+    TimerPrecision precision = TimerPrecision.millisecond,
   }) {
     ExecutionWatch result;
 
@@ -139,6 +140,7 @@ class ExecutionWatch {
           ExecutionWatch._(
             group: group,
             name: name,
+            precision: precision,
           );
       timers[name] = timer;
 
@@ -156,6 +158,7 @@ class ExecutionWatch {
   ExecutionWatch._({
     required this.group,
     required this.name,
+    required this.precision,
   });
 
   /// The group for the watch and timers.
@@ -163,6 +166,11 @@ class ExecutionWatch {
 
   /// The name of the watch and timers within the group.
   final String name;
+
+  /// The precision to use for the timers.  You may which to use
+  /// [TimerPrecision.millisecond] for relatively long running tasks and
+  /// [TimerPrecision.microsecond] for multiple, very fast, timers.
+  final TimerPrecision precision;
 
   final List<ExecutionTimer> _timers = [];
 
@@ -212,7 +220,9 @@ class ExecutionWatch {
 
 class ExecutionTimer {
   ExecutionTimer._(this._parent)
-      : startTime = DateTime.now().millisecondsSinceEpoch;
+      : startTime = _parent.precision == TimerPrecision.millisecond
+            ? DateTime.now().millisecondsSinceEpoch
+            : DateTime.now().microsecondsSinceEpoch;
 
   final ExecutionWatch _parent;
 
@@ -226,11 +236,12 @@ class ExecutionTimer {
 
   String get name => _parent.name;
 
-  /// Returns the number of milliseconds this timer executed for.  If the timer
+  TimerPrecision get precision => _parent.precision;
+
+  /// Returns the number of ticks this timer executed for.  If the timer
   /// has not yet stopped, this will return the amount of time between now and
   /// when the timer was started.
-  int get runTime =>
-      (endTime ?? DateTime.now().millisecondsSinceEpoch) - startTime;
+  int get runTime => (endTime ?? _now) - startTime;
 
   /// Cancels the timer and removes it from the [TimeKeeper].  This action
   /// cannot be undone.
@@ -238,7 +249,16 @@ class ExecutionTimer {
 
   /// Stops the timer and marks the end time as the current time.  If the timer
   /// has already been stopped, this has no effect.
-  void stop() => _endTime ??= DateTime.now().millisecondsSinceEpoch;
+  void stop() => _endTime ??= _now;
+
+  int get _now => precision == TimerPrecision.millisecond
+      ? DateTime.now().millisecondsSinceEpoch
+      : DateTime.now().microsecondsSinceEpoch;
+}
+
+enum TimerPrecision {
+  microsecond,
+  millisecond,
 }
 
 class _NoOpExecutionWatch implements ExecutionWatch {
@@ -252,6 +272,9 @@ class _NoOpExecutionWatch implements ExecutionWatch {
 
   @override
   final String name;
+
+  @override
+  final TimerPrecision precision = TimerPrecision.millisecond;
 
   @override
   List<ExecutionTimer> get _timers => const [];
@@ -270,6 +293,9 @@ class _NoOpExecutionTimer implements ExecutionTimer {
   _NoOpExecutionTimer(this._parent);
 
   @override
+  final TimerPrecision precision = TimerPrecision.millisecond;
+
+  @override
   final int startTime = DateTime.now().millisecondsSinceEpoch;
 
   @override
@@ -282,6 +308,9 @@ class _NoOpExecutionTimer implements ExecutionTimer {
   set _endTime(int? endTime) {
     // no-op
   }
+
+  @override
+  int get _now => DateTime.now().millisecondsSinceEpoch;
 
   @override
   String get group => _parent.group;

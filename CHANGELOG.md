@@ -1,3 +1,8 @@
+## [1.1.0] - Movember 2nd, 2023
+
+* Added precision to `ExecutionWatch` to be able to specific the precision is `millisecond` or `microsecond`.
+
+
 ## [1.0.3+8] - October 31, 2023
 
 * Automated dependency updates
