@@ -19,3 +19,6 @@ jobs:
 
       - name: Validate
         uses: peiffer-innovations/actions-flutter-validate@v2
+
+      - name: Security Scan
+        uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v1.7.3"
