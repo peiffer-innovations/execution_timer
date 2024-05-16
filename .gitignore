@@ -10,6 +10,7 @@
 .svn/
 pubspec.lock
 output
+.vscode/
 
 # IntelliJ related
 *.iml
